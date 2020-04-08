@@ -1,6 +1,9 @@
 # Visual Studio 2015 user specific files
 .vs/
 
+# External Assets
+Content/SunTemple/*
+
 # Compiled Object files
 *.slo
 *.lo
