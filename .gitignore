@@ -3,6 +3,7 @@
 
 # External Assets
 Content/SunTemple/*
+Content/Office/*
 
 # Compiled Object files
 *.slo
