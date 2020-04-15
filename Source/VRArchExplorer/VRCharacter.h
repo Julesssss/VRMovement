@@ -3,8 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/InputComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "TimerManager.h"
 #include "GameFramework/Character.h"
 #include "VRCharacter.generated.h"
+
 
 UCLASS()
 class VRARCHEXPLORER_API AVRCharacter : public ACharacter
@@ -33,10 +38,18 @@ private:
 	void MoveForward(float throttle);
 	void MoveRight(float throttle);
 
+	void BeginTeleport();
+	void EndTeleport();
+
 private:
+
+	APlayerController* PlayerController;
 
 	UPROPERTY(EditAnywhere)
 	float MaxTeleportDistance = 1000;
+
+	UPROPERTY(EditAnywhere)
+	float TeleportFadeTime = 0.6f;
 
 private:
 
