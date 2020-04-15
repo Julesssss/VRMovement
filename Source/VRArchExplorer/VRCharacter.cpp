@@ -88,23 +88,39 @@ void AVRCharacter::MoveRight(float throttle)
 
 void AVRCharacter::BeginTeleport()
 {
-	if (PlayerController != nullptr) {
-		PlayerController->PlayerCameraManager->StartCameraFade(0, 1, TeleportFadeTime, FLinearColor::Black, true, false);
+
+	if (IsTeleporting == false && PlayerController != nullptr) {
+
+		// Set Teleport status
+		IsTeleporting = true;
+
+		// Fade Camera
+		PlayerController->PlayerCameraManager->StartCameraFade(0, 1, TeleportFadeTime, FLinearColor::Black, true, true);
 
 		FTimerHandle Handle;
-		GetWorldTimerManager().SetTimer(Handle, this, &AVRCharacter::EndTeleport, TeleportFadeTime, false);
+		GetWorldTimerManager().SetTimer(Handle, this, &AVRCharacter::DoTeleport, TeleportFadeTime, false);
 	}
 }
 
-void AVRCharacter::EndTeleport()
+void AVRCharacter::DoTeleport()
 {
+	// Teleport and wait
 	FVector TeleportMarkerLocation = DestinationMarker->GetComponentLocation();
 	TeleportMarkerLocation += GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() * GetActorUpVector();
 	SetActorLocation(TeleportMarkerLocation);
 
+	FTimerHandle Handle;
+	GetWorldTimerManager().SetTimer(Handle, this, &AVRCharacter::EndTeleport, TeleportPauseTime, false);
+}
+
+void AVRCharacter::EndTeleport()
+{
 	if (PlayerController != nullptr) 
 	{
 		PlayerController->PlayerCameraManager->StartCameraFade(1, 0, TeleportFadeTime, FLinearColor::Black, true, false);
 	}
+
+	// Allow user to teleport as fade in occurs
+	IsTeleporting = false;
 }
 

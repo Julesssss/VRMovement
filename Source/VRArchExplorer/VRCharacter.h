@@ -39,17 +39,23 @@ private:
 	void MoveRight(float throttle);
 
 	void BeginTeleport();
+	void DoTeleport();
 	void EndTeleport();
 
 private:
 
 	APlayerController* PlayerController;
 
+	bool IsTeleporting = false;
+
 	UPROPERTY(EditAnywhere)
 	float MaxTeleportDistance = 1000;
 
 	UPROPERTY(EditAnywhere)
 	float TeleportFadeTime = 0.6f;
+
+	UPROPERTY(EditAnywhere)
+	float TeleportPauseTime = 0.2f;
 
 private:
 
