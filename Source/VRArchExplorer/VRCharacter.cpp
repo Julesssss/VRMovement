@@ -26,7 +26,8 @@ AVRCharacter::AVRCharacter()
 void AVRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	DestinationMarker->SetVisibility(true);
 }
 
 // Called every frame
@@ -57,6 +58,10 @@ void AVRCharacter::UpdateDestinationMarker()
 	if (bHit) {
 		// DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, true, -1, 0, 10);
 		DestinationMarker->SetWorldLocation(HitResult.Location);
+		DestinationMarker->SetVisibility(true);
+	}
+	else {
+		DestinationMarker->SetVisibility(false);
 	}
 ;}
 
