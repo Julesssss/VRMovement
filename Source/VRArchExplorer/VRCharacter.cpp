@@ -1,3 +1,4 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
@@ -49,16 +50,33 @@ void AVRCharacter::Tick(float DeltaTime)
 	UpdateDestinationMarker();
 }
 
-void AVRCharacter::UpdateDestinationMarker() 
-{
+bool AVRCharacter::FindDestinationMarker(FVector& OutLocation) {
 	FHitResult HitResult;
 	FVector Start = Camera->GetComponentLocation();
 	FVector End = Start + Camera->GetForwardVector() * MaxTeleportDistance;
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
 
-	if (bHit) {
+	if (!bHit) return false;
+
+	FVector Out;
+	FNavLocation NavLocation;
+	bool bOnNavMesh = UNavigationSystemV1::GetCurrent(GetWorld())->ProjectPointToNavigation(HitResult.Location, NavLocation, TeleportProjectionExtent);
+
+	if (!bOnNavMesh) return false;
+
+	OutLocation = NavLocation.Location;
+
+	return bHit && bOnNavMesh;
+}
+
+void AVRCharacter::UpdateDestinationMarker() 
+{
+	FVector OutLocation;
+	bool IsAllowedToTeleport = FindDestinationMarker(OutLocation);
+
+	if (IsAllowedToTeleport) {
 		// DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, true, -1, 0, 10);
-		DestinationMarker->SetWorldLocation(HitResult.Location);
+		DestinationMarker->SetWorldLocation(OutLocation);
 		DestinationMarker->SetVisibility(true);
 	}
 	else {
@@ -94,8 +112,7 @@ void AVRCharacter::BeginTeleport()
 		// Set Teleport status
 		IsTeleporting = true;
 
-		// Fade Camera
-		PlayerController->PlayerCameraManager->StartCameraFade(0, 1, TeleportFadeTime, FLinearColor::Black, true, true);
+		CameraFade(0, 1, true);
 
 		FTimerHandle Handle;
 		GetWorldTimerManager().SetTimer(Handle, this, &AVRCharacter::DoTeleport, TeleportFadeTime, false);
@@ -104,23 +121,32 @@ void AVRCharacter::BeginTeleport()
 
 void AVRCharacter::DoTeleport()
 {
-	// Teleport and wait
+	// Get Marker location
 	FVector TeleportMarkerLocation = DestinationMarker->GetComponentLocation();
+	
+	// Set correct player height/location
 	TeleportMarkerLocation += GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() * GetActorUpVector();
 	SetActorLocation(TeleportMarkerLocation);
 
+	// Hold dark screen for a moment
 	FTimerHandle Handle;
 	GetWorldTimerManager().SetTimer(Handle, this, &AVRCharacter::EndTeleport, TeleportPauseTime, false);
 }
 
 void AVRCharacter::EndTeleport()
 {
-	if (PlayerController != nullptr) 
-	{
-		PlayerController->PlayerCameraManager->StartCameraFade(1, 0, TeleportFadeTime, FLinearColor::Black, true, false);
-	}
+	// Fade back in
+	CameraFade(1, 0, false);
 
 	// Allow user to teleport as fade in occurs
 	IsTeleporting = false;
+}
+
+void AVRCharacter::CameraFade(float FromAlpha, float ToAlpha, bool ShouldHold)
+{
+	if (PlayerController != nullptr)
+	{
+		PlayerController->PlayerCameraManager->StartCameraFade(FromAlpha, ToAlpha, TeleportFadeTime, FLinearColor::Black, true, ShouldHold);
+	}
 }
 

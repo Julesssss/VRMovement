@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerController.h"
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
+#include "NavigationSystem.h"
 #include "VRCharacter.generated.h"
 
 
@@ -32,7 +33,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	// Functions
 
+	bool FindDestinationMarker(FVector &OutLocation);
 	void UpdateDestinationMarker();
 
 	void MoveForward(float throttle);
@@ -42,11 +45,25 @@ private:
 	void DoTeleport();
 	void EndTeleport();
 
+	void CameraFade(float FromAlpha, float ToAlpha, bool ShouldHold);
+
 private:
+	// Properties
 
 	APlayerController* PlayerController;
 
 	bool IsTeleporting = false;
+
+	UPROPERTY(VisibleAnywhere)
+	class UCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere)
+	class USceneComponent* VRRoot;
+
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* DestinationMarker;
+
+	// Editable
 
 	UPROPERTY(EditAnywhere)
 	float MaxTeleportDistance = 1000;
@@ -57,14 +74,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	float TeleportPauseTime = 0.2f;
 
-private:
-
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* Camera;
-
-	UPROPERTY(VisibleAnywhere)
-	class USceneComponent* VRRoot;
-
-	UPROPERTY(VisibleAnywhere)
-	class UStaticMeshComponent* DestinationMarker;
+	UPROPERTY(EditAnywhere)
+	FVector TeleportProjectionExtent = FVector(100, 100, 100);
 };
