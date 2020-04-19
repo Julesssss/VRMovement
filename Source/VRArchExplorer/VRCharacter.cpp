@@ -58,6 +58,7 @@ void AVRCharacter::Tick(float DeltaTime)
 	VRRoot->AddWorldOffset(-CameraOffset);
 
 	UpdateDestinationMarker();
+	UpdateBlinkers();
 }
 
 bool AVRCharacter::FindDestinationMarker(FVector& OutLocation) {
@@ -93,6 +94,18 @@ void AVRCharacter::UpdateDestinationMarker()
 		DestinationMarker->SetVisibility(false);
 	}
 ;}
+
+void AVRCharacter::UpdateBlinkers()
+{
+	if (RadiusVsVelocity == nullptr) return;
+
+	float Speed = GetVelocity().Size();
+	float Radius = RadiusVsVelocity->GetFloatValue(Speed);
+
+	// UE_LOG(LogTemp, Warning, TEXT("Speed: %f"), Speed);
+
+	BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), Radius);
+}
 
 // Called to bind functionality to input
 void AVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

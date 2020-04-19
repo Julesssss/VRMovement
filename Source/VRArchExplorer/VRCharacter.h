@@ -11,6 +11,7 @@
 #include "NavigationSystem.h"
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Curves/CurveFloat.h"
 #include "VRCharacter.generated.h"
 
 
@@ -39,6 +40,7 @@ private:
 
 	bool FindDestinationMarker(FVector &OutLocation);
 	void UpdateDestinationMarker();
+	void UpdateBlinkers();
 
 	void MoveForward(float throttle);
 	void MoveRight(float throttle);
@@ -73,6 +75,12 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
+	UPROPERTY(EditAnywhere)
+	class UMaterialInterface* BlinkerMaterialBase;
+
+	UPROPERTY(EditAnywhere)
+	class UCurveFloat* RadiusVsVelocity;
+
 	// Editable
 
 	UPROPERTY(EditAnywhere)
@@ -86,7 +94,4 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	FVector TeleportProjectionExtent = FVector(100, 100, 100);
-
-	UPROPERTY(EditAnywhere)
-	class UMaterialInterface * BlinkerMaterialBase;
 };
