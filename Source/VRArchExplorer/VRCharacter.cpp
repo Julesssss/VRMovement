@@ -20,6 +20,10 @@ AVRCharacter::AVRCharacter()
 
 	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DestinationMarker"));
 	DestinationMarker->SetupAttachment(GetRootComponent());
+
+	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
+	PostProcessComponent->SetupAttachment(GetRootComponent());
+	
 }
 
 // Called when the game starts or when spawned
@@ -29,7 +33,13 @@ void AVRCharacter::BeginPlay()
 
 	DestinationMarker->SetVisibility(true);
 
+	// Setup global references
 	PlayerController = Cast<APlayerController>(GetController());
+
+	if (BlinkerMaterialBase != nullptr) {
+		BlinkerMaterialInstance = UMaterialInstanceDynamic::Create(BlinkerMaterialBase, this);
+		PostProcessComponent->AddOrUpdateBlendable(BlinkerMaterialInstance);
+	}
 }
 
 // Called every frame

@@ -9,6 +9,8 @@
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
 #include "NavigationSystem.h"
+#include "Components/PostProcessComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "VRCharacter.generated.h"
 
 
@@ -48,11 +50,13 @@ private:
 	void CameraFade(float FromAlpha, float ToAlpha, bool ShouldHold);
 
 private:
-	// Properties
+	// Globals
 
 	APlayerController* PlayerController;
 
 	bool IsTeleporting = false;
+
+	// References
 
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* Camera;
@@ -62,6 +66,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* DestinationMarker;
+
+	UPROPERTY(VisibleAnywhere)
+	class UPostProcessComponent* PostProcessComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
 	// Editable
 
@@ -76,4 +86,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	FVector TeleportProjectionExtent = FVector(100, 100, 100);
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialInterface * BlinkerMaterialBase;
 };
