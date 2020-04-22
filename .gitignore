@@ -4,6 +4,11 @@
 # External Assets
 Content/SunTemple/*
 Content/Office/*
+Content/Assets/Hanger_05/
+Content/Assets/Lights/
+Content/Megascans/
+Content/StarterContent/
+Content/MSPresets/MSTextures/
 
 # Compiled Object files
 *.slo
