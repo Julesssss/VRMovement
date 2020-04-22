@@ -4,6 +4,8 @@
 
 #include "VRCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "MotionControllerComponent.h"
+#include "XRMotionControllerBase.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -17,6 +19,14 @@ AVRCharacter::AVRCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(VRRoot);
+
+	LeftController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("LeftController"));
+	LeftController->SetupAttachment(GetRootComponent());
+	LeftController->SetTrackingMotionSource(FXRMotionControllerBase::LeftHandSourceId);
+
+	RightController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("RightController"));
+	RightController->SetupAttachment(GetRootComponent());
+	RightController->SetTrackingMotionSource(FXRMotionControllerBase::RightHandSourceId);
 
 	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DestinationMarker"));
 	DestinationMarker->SetupAttachment(GetRootComponent());
@@ -56,6 +66,9 @@ void AVRCharacter::Tick(float DeltaTime)
 	
 	// Move VRRoot in opposite Vector
 	VRRoot->AddWorldOffset(-CameraOffset);
+	
+	// Move Controllers in opposite Vector // THIS DOES NOTHING?!?!?!
+	RightController->AddWorldOffset(CameraOffset);
 
 	UpdateDestinationMarker();
 	UpdateBlinkers();
@@ -108,8 +121,7 @@ void AVRCharacter::UpdateBlinkers()
 	BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), Radius);
 
 	FVector2D Center = GetVectorCenter();
-	BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Center"), FLinearColor(.5, .5, 0));
-	//BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Center"), FLinearColor(Center.X, Center.Y, 0));
+	BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Center"), FLinearColor(Center.X, Center.Y, 0));
 }
 
 FVector2D AVRCharacter::GetVectorCenter()

@@ -65,6 +65,12 @@ private:
 	class UCameraComponent* Camera;
 
 	UPROPERTY(VisibleAnywhere)
+	class UMotionControllerComponent* LeftController;
+
+	UPROPERTY(VisibleAnywhere)
+	class UMotionControllerComponent* RightController;
+
+	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* VRRoot;
 
 	UPROPERTY(VisibleAnywhere)
@@ -76,16 +82,16 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
+	// Editable
+
 	UPROPERTY(EditAnywhere)
 	class UMaterialInterface* BlinkerMaterialBase;
 
 	UPROPERTY(EditAnywhere)
 	class UCurveFloat* RadiusVsVelocity;
 
-	// Editable
-
 	UPROPERTY(EditAnywhere)
-	float MaxTeleportDistance = 1000;
+	float MaxTeleportDistance = 5000;
 
 	UPROPERTY(EditAnywhere)
 	float TeleportFadeTime = 0.6f;
