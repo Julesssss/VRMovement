@@ -41,6 +41,7 @@ private:
 	bool FindDestinationMarker(FVector &OutLocation);
 	void UpdateDestinationMarker();
 	void UpdateBlinkers();
+	FVector2D GetVectorCenter();
 
 	void MoveForward(float throttle);
 	void MoveRight(float throttle);

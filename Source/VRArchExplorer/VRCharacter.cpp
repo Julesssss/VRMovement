@@ -31,7 +31,7 @@ void AVRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DestinationMarker->SetVisibility(true);
+	DestinationMarker->SetVisibility(false);
 
 	// Setup global references
 	PlayerController = Cast<APlayerController>(GetController());
@@ -62,9 +62,10 @@ void AVRCharacter::Tick(float DeltaTime)
 }
 
 bool AVRCharacter::FindDestinationMarker(FVector& OutLocation) {
-	FHitResult HitResult;
 	FVector Start = Camera->GetComponentLocation();
 	FVector End = Start + Camera->GetForwardVector() * MaxTeleportDistance;
+	
+	FHitResult HitResult;
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
 
 	if (!bHit) return false;
@@ -77,7 +78,7 @@ bool AVRCharacter::FindDestinationMarker(FVector& OutLocation) {
 
 	OutLocation = NavLocation.Location;
 
-	return bHit && bOnNavMesh;
+	return true;
 }
 
 void AVRCharacter::UpdateDestinationMarker() 
@@ -87,8 +88,8 @@ void AVRCharacter::UpdateDestinationMarker()
 
 	if (IsAllowedToTeleport) {
 		// DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, true, -1, 0, 10);
-		DestinationMarker->SetWorldLocation(OutLocation);
 		DestinationMarker->SetVisibility(true);
+		DestinationMarker->SetWorldLocation(OutLocation);
 	}
 	else {
 		DestinationMarker->SetVisibility(false);
@@ -105,6 +106,41 @@ void AVRCharacter::UpdateBlinkers()
 	// UE_LOG(LogTemp, Warning, TEXT("Speed: %f"), Speed);
 
 	BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), Radius);
+
+	FVector2D Center = GetVectorCenter();
+	BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Center"), FLinearColor(.5, .5, 0));
+	//BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Center"), FLinearColor(Center.X, Center.Y, 0));
+}
+
+FVector2D AVRCharacter::GetVectorCenter()
+{
+	FVector MovementDirection = GetVelocity().GetSafeNormal();
+	if (MovementDirection.IsNearlyZero()) return FVector2D(.5, .5);
+
+	FVector WorldStationaryLocation;
+	if (FVector::DotProduct(Camera->GetForwardVector(), MovementDirection) > 0)
+	{
+		WorldStationaryLocation = Camera->GetComponentLocation() + (MovementDirection * 1000);
+	}
+	else {
+		WorldStationaryLocation = Camera->GetComponentLocation() - (MovementDirection * 1000);
+	}
+	
+	if (PlayerController == nullptr) return FVector2D(.5, .5);
+
+	FVector2D ScreenLocation;
+	PlayerController->ProjectWorldLocationToScreen(WorldStationaryLocation, ScreenLocation);
+
+	int32 ViewportX, ViewportY;
+	PlayerController->GetViewportSize(ViewportX, ViewportY);
+
+	UE_LOG(LogTemp, Warning, TEXT("ScreenLocation: %f, %f"), ScreenLocation.X, ScreenLocation.Y);
+	UE_LOG(LogTemp, Warning, TEXT("ViewportSize: %i, %i"), ViewportX, ViewportY);
+
+	ScreenLocation.X /= ViewportX;
+	ScreenLocation.Y /= ViewportY;
+
+	return ScreenLocation;
 }
 
 // Called to bind functionality to input
@@ -129,7 +165,6 @@ void AVRCharacter::MoveRight(float throttle)
 
 void AVRCharacter::BeginTeleport()
 {
-
 	if (IsTeleporting == false && PlayerController != nullptr) {
 
 		// Set Teleport status
