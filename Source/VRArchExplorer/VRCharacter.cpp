@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h"
+//#include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -78,11 +79,15 @@ void AVRCharacter::Tick(float DeltaTime)
 }
 
 bool AVRCharacter::FindDestinationMarker(FVector& OutLocation) {
-	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + Camera->GetForwardVector() * MaxTeleportDistance;
+	FVector Start = RightController->GetComponentLocation();
+	FVector LookVector = RightController->GetForwardVector();
+	LookVector = LookVector.RotateAngleAxis(30, RightController->GetRightVector());
+
+	FVector End = Start + LookVector * MaxTeleportDistance;
 	
 	FHitResult HitResult;
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, -1, 0, 10);
 
 	if (!bHit) return false;
 
@@ -103,7 +108,6 @@ void AVRCharacter::UpdateDestinationMarker()
 	bool IsAllowedToTeleport = FindDestinationMarker(OutLocation);
 
 	if (IsAllowedToTeleport) {
-		// DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, true, -1, 0, 10);
 		DestinationMarker->SetVisibility(true);
 		DestinationMarker->SetWorldLocation(OutLocation);
 	}
