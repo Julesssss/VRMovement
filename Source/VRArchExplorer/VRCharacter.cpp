@@ -20,12 +20,15 @@ AVRCharacter::AVRCharacter()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(VRRoot);
 
+	HandsRoot = CreateDefaultSubobject<USceneComponent>(TEXT("HandsRoot"));
+	HandsRoot->SetupAttachment(VRRoot);
+
 	LeftController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("LeftController"));
-	LeftController->SetupAttachment(GetRootComponent());
+	LeftController->SetupAttachment(HandsRoot);
 	LeftController->SetTrackingMotionSource(FXRMotionControllerBase::LeftHandSourceId);
 
 	RightController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("RightController"));
-	RightController->SetupAttachment(GetRootComponent());
+	RightController->SetupAttachment(HandsRoot);
 	RightController->SetTrackingMotionSource(FXRMotionControllerBase::RightHandSourceId);
 
 	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DestinationMarker"));

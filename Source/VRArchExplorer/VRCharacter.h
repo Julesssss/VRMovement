@@ -74,6 +74,9 @@ private:
 	class USceneComponent* VRRoot;
 
 	UPROPERTY(VisibleAnywhere)
+	class USceneComponent* HandsRoot;
+
+	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* DestinationMarker;
 
 	UPROPERTY(VisibleAnywhere)
