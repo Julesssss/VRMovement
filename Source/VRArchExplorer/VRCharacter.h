@@ -10,6 +10,7 @@
 #include "GameFramework/Character.h"
 #include "NavigationSystem.h"
 #include "Components/PostProcessComponent.h"
+#include "Components/SplineComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Curves/CurveFloat.h"
 #include "VRCharacter.generated.h"
@@ -38,9 +39,10 @@ public:
 private:
 	// Functions
 
-	bool FindDestinationMarker(FVector &OutLocation);
+	bool FindDestinationMarker(TArray<FVector>& OutPath, FVector& OutLocation);
 	void UpdateDestinationMarker();
 	void UpdateBlinkers();
+	void UpdateSpline(const TArray<FVector> &Path);
 	FVector2D GetVectorCenter();
 
 	void MoveForward(float throttle);
@@ -79,6 +81,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* HandsRoot;
+
+	UPROPERTY(VisibleAnywhere)
+	class USplineComponent* TeleportPath;
 
 	UPROPERTY(VisibleAnywhere)
 	class UStaticMeshComponent* DestinationMarker;
