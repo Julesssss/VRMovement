@@ -109,7 +109,13 @@ void AVRCharacter::UpdateDestinationMarker()
 
 	if (IsAllowedToTeleport) {
 		DestinationMarker->SetVisibility(true);
-		DestinationMarker->SetWorldLocation(OutLocation);
+
+		if (IsFading) {
+			DestinationMarker->SetWorldLocation(NewTeleportLocation);
+		}
+		else {
+			DestinationMarker->SetWorldLocation(OutLocation);
+		}
 	}
 	else {
 		DestinationMarker->SetVisibility(false);
@@ -188,6 +194,8 @@ void AVRCharacter::BeginTeleport()
 
 		// Set Teleport status
 		IsTeleporting = true;
+		IsFading = true;
+		NewTeleportLocation = DestinationMarker->GetComponentLocation();
 
 		CameraFade(0, 1, true);
 
@@ -204,6 +212,9 @@ void AVRCharacter::DoTeleport()
 	// Set correct player height/location
 	TeleportMarkerLocation += GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() * GetActorUpVector();
 	SetActorLocation(TeleportMarkerLocation);
+
+	// Re-show destination marker
+	IsFading = false;
 
 	// Hold dark screen for a moment
 	FTimerHandle Handle;
@@ -226,4 +237,3 @@ void AVRCharacter::CameraFade(float FromAlpha, float ToAlpha, bool ShouldHold)
 		PlayerController->PlayerCameraManager->StartCameraFade(FromAlpha, ToAlpha, TeleportFadeTime, FLinearColor::Black, true, ShouldHold);
 	}
 }
-

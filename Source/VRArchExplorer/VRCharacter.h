@@ -59,6 +59,10 @@ private:
 
 	bool IsTeleporting = false;
 
+	bool IsFading = false;
+
+	FVector NewTeleportLocation;
+
 	// References
 
 	UPROPERTY(VisibleAnywhere)
