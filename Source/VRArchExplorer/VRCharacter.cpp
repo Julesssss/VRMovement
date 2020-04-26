@@ -6,7 +6,9 @@
 #include "Camera/CameraComponent.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h"
-//#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/GameplayStaticsTypes.h"
+#include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -79,21 +81,33 @@ void AVRCharacter::Tick(float DeltaTime)
 }
 
 bool AVRCharacter::FindDestinationMarker(FVector& OutLocation) {
+
 	FVector Start = RightController->GetComponentLocation();
 	FVector LookVector = RightController->GetForwardVector();
-	LookVector = LookVector.RotateAngleAxis(30, RightController->GetRightVector());
-
-	FVector End = Start + LookVector * MaxTeleportDistance;
+	// LookVector = LookVector.RotateAngleAxis(30, RightController->GetRightVector());
 	
-	FHitResult HitResult;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, -1, 0, 10);
+	/*
+		// Project in a straight line to find location
+
+		FVector End = Start + LookVector * MaxTeleportDistance;
+		FHitResult HitResult;
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility);
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Emerald, false, -1, 0, 10);
+	*/
+
+	// Draw parabolic arc to teleport destination
+	FPredictProjectilePathParams Params(TeleportProjectileRadius, Start, LookVector * TeleportProjectileSpeed, TeleportSimulationTime, ECollisionChannel::ECC_Visibility, this);
+	Params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
+	Params.bTraceComplex = true; // to fix buggy placement
+	FPredictProjectilePathResult PredictResult;
+	bool bHit = UGameplayStatics::PredictProjectilePath(this, Params, PredictResult);
+
 
 	if (!bHit) return false;
 
 	FVector Out;
 	FNavLocation NavLocation;
-	bool bOnNavMesh = UNavigationSystemV1::GetCurrent(GetWorld())->ProjectPointToNavigation(HitResult.Location, NavLocation, TeleportProjectionExtent);
+	bool bOnNavMesh = UNavigationSystemV1::GetCurrent(GetWorld())->ProjectPointToNavigation(PredictResult.HitResult.Location, NavLocation, TeleportProjectionExtent);
 
 	if (!bOnNavMesh) return false;
 
@@ -190,7 +204,7 @@ void AVRCharacter::MoveRight(float throttle)
 
 void AVRCharacter::BeginTeleport()
 {
-	if (IsTeleporting == false && PlayerController != nullptr) {
+	if (IsTeleporting == false && PlayerController != nullptr && DestinationMarker->IsVisible()) {
 
 		// Set Teleport status
 		IsTeleporting = true;

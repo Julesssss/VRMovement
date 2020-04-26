@@ -98,7 +98,13 @@ private:
 	class UCurveFloat* RadiusVsVelocity;
 
 	UPROPERTY(EditAnywhere)
-	float MaxTeleportDistance = 5000;
+	float TeleportProjectileSpeed = 1000;
+
+	UPROPERTY(EditAnywhere)
+	float TeleportSimulationTime = 5;
+
+	UPROPERTY(EditAnywhere)
+	float TeleportProjectileRadius = 10;
 
 	UPROPERTY(EditAnywhere)
 	float TeleportFadeTime = 0.6f;
