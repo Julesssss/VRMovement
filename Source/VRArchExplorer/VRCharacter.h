@@ -42,6 +42,7 @@ private:
 	bool FindDestinationMarker(TArray<FVector>& OutPath, FVector& OutLocation);
 	void UpdateDestinationMarker();
 	void UpdateBlinkers();
+	void DrawTeleportPath(const TArray<FVector> &Path);
 	void UpdateSpline(const TArray<FVector> &Path);
 	FVector2D GetVectorCenter();
 
@@ -92,7 +93,13 @@ private:
 	class UPostProcessComponent* PostProcessComponent;
 
 	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* DynamicMesh;
+
+	UPROPERTY(VisibleAnywhere)
 	UMaterialInstanceDynamic* BlinkerMaterialInstance;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<class UStaticMeshComponent*> ArcMeshObjctPool;
 
 	// Editable
 
@@ -119,4 +126,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	FVector TeleportProjectionExtent = FVector(100, 100, 100);
+
+	// Editable by Blueprint
+
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMesh* TeleportArcMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	UMaterialInterface* TeleportArcMaterial;
 };

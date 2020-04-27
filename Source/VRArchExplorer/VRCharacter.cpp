@@ -138,7 +138,7 @@ void AVRCharacter::UpdateDestinationMarker()
 		else {
 			DestinationMarker->SetWorldLocation(OutLocation);
 		}
-		UpdateSpline(Path);
+		DrawTeleportPath(Path);
 	}
 	else {
 		DestinationMarker->SetVisibility(false);
@@ -160,8 +160,35 @@ void AVRCharacter::UpdateBlinkers()
 	BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Center"), FLinearColor(Center.X, Center.Y, 0));
 }
 
+void AVRCharacter::DrawTeleportPath(const TArray<FVector>& Path) 
+{
+	UpdateSpline(Path);
+
+	// Draw path
+	for (int32 i = 0; i < Path.Num(); i++)
+	{
+		UStaticMeshComponent* DynamicMesh;
+		// Allocate and draw meshes
+		if (i >= ArcMeshObjctPool.Num()) {
+			// Create new mesh for pool
+			DynamicMesh = NewObject<UStaticMeshComponent>(this);
+			DynamicMesh->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
+			DynamicMesh->SetStaticMesh(TeleportArcMesh);
+			DynamicMesh->SetMaterial(0, TeleportArcMaterial);
+			DynamicMesh->RegisterComponent();
+			ArcMeshObjctPool.Add(DynamicMesh);
+		}
+		else {
+			DynamicMesh = ArcMeshObjctPool[i];
+		}
+
+		DynamicMesh->SetWorldLocation(Path[i]);
+	}
+}
+
 void AVRCharacter::UpdateSpline(const TArray<FVector>& Path) {
 	TeleportPath->ClearSplinePoints(false);
+
 	for (int32 i = 0; i < Path.Num(); i++) 
 	{
 		FVector LocalPosition = TeleportPath->GetComponentTransform().InverseTransformPosition(Path[i]);
