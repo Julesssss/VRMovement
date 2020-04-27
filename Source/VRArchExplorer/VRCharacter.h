@@ -99,7 +99,7 @@ private:
 	UMaterialInstanceDynamic* BlinkerMaterialInstance;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<class UStaticMeshComponent*> ArcMeshObjctPool;
+	TArray<class USplineMeshComponent*> ArcMeshObjctPool;
 
 	// Editable
 

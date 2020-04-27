@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStaticsTypes.h"
 #include "DrawDebugHelpers.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SplineMeshComponent.h"
 
 // Sets default values
 AVRCharacter::AVRCharacter()
@@ -100,7 +101,6 @@ bool AVRCharacter::FindDestinationMarker(TArray<FVector> &OutPath, FVector& OutL
 
 	// Draw parabolic arc to teleport destination
 	FPredictProjectilePathParams Params(TeleportProjectileRadius, Start, LookVector * TeleportProjectileSpeed, TeleportSimulationTime, ECollisionChannel::ECC_Visibility, this);
-	Params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
 	Params.bTraceComplex = true; // to fix buggy placement
 
 	FPredictProjectilePathResult PredictResult;
@@ -142,6 +142,9 @@ void AVRCharacter::UpdateDestinationMarker()
 	}
 	else {
 		DestinationMarker->SetVisibility(false);
+
+		TArray <FVector>EmptyPath;
+		DrawTeleportPath(EmptyPath);
 	}
 ;}
 
@@ -164,25 +167,40 @@ void AVRCharacter::DrawTeleportPath(const TArray<FVector>& Path)
 {
 	UpdateSpline(Path);
 
+	// hide teleport arc paths
+	for (USplineMeshComponent* SplineMesh : ArcMeshObjctPool) {
+		SplineMesh->SetVisibility(false);
+	}
+
 	// Draw path
-	for (int32 i = 0; i < Path.Num(); i++)
+	int32 ArcSegmentCount = Path.Num() - 1;
+	for (int32 i = 0; i < ArcSegmentCount; i++)
 	{
-		UStaticMeshComponent* DynamicMesh;
+		USplineMeshComponent* SplineMesh;
+
 		// Allocate and draw meshes
 		if (i >= ArcMeshObjctPool.Num()) {
 			// Create new mesh for pool
-			DynamicMesh = NewObject<UStaticMeshComponent>(this);
-			DynamicMesh->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
-			DynamicMesh->SetStaticMesh(TeleportArcMesh);
-			DynamicMesh->SetMaterial(0, TeleportArcMaterial);
-			DynamicMesh->RegisterComponent();
-			ArcMeshObjctPool.Add(DynamicMesh);
+			SplineMesh = NewObject<USplineMeshComponent>(this);
+			SplineMesh->SetMobility(EComponentMobility::Movable);
+			SplineMesh->AttachToComponent(TeleportPath, FAttachmentTransformRules::KeepRelativeTransform);
+			SplineMesh->SetStaticMesh(TeleportArcMesh);
+			SplineMesh->SetMaterial(0, TeleportArcMaterial);
+			SplineMesh->RegisterComponent();
+			ArcMeshObjctPool.Add(SplineMesh);
 		}
 		else {
-			DynamicMesh = ArcMeshObjctPool[i];
+			SplineMesh = ArcMeshObjctPool[i];
 		}
 
-		DynamicMesh->SetWorldLocation(Path[i]);
+		// Get arc path tangent
+		FVector StartLocation, EndLocation, StartTangent, EndTangent;
+		TeleportPath->GetLocalLocationAndTangentAtSplinePoint(i, StartLocation, StartTangent);
+		TeleportPath->GetLocalLocationAndTangentAtSplinePoint(i + 1, EndLocation, EndTangent);
+
+		// Pass to spline mesh
+		SplineMesh->SetStartAndEnd(StartLocation, StartTangent, EndLocation, EndTangent, true);
+		SplineMesh->SetVisibility(true);
 	}
 }
 
